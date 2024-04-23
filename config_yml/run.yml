@@ -1,0 +1,44 @@
+---
+ops: [train, evaluate]
+model: {
+    path: model/basset.py, # change model
+    class: Basset,  # change model_function
+    class_args: {
+        sequence_length: 1000, # change sequence_length
+        n_targets: 196, # change n_targets
+    },
+    non_strand_specific: mean
+}
+sampler: !obj:selene_sdk.samplers.IntervalsSampler {
+    reference_sequence: !obj:selene_sdk.sequences.Genome {
+        input_path: hg19.fasta,  # change reference_sequence
+        blacklist_regions: hg19
+    },
+    features: !obj:selene_sdk.utils.load_features_list {
+        input_path: feature.txt   # change features
+    },
+    target_path: sorted_GSE61475_lpf.bed.gz, # change target_path
+    intervals_path: GSE61475_TF_intervals.txt,  # change intervals_path
+    test_holdout: [chr8, chr9],
+    validation_holdout: [chr6, chr7],
+    seed: 127,
+    sequence_length: 1000, # change sequence_length
+    center_bin_to_predict: 200,
+    feature_thresholds: 0.5,
+    mode: train,
+    save_datasets: [train, test, validate]
+}
+train_model: !obj:selene_sdk.TrainModel {
+    batch_size: 64,
+    max_steps: 120000,
+    report_stats_every_n_steps: 16000,
+    n_validation_samples: 4000,
+    n_test_samples: 16000,
+    use_cuda: True,
+    data_parallel: True,
+    logging_verbosity: 2
+}
+output_dir: output_dir # change output_dir
+random_seed: 1447
+create_subdirectory: False
+...
